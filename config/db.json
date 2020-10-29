@@ -1,6 +1,21 @@
 {
-    "defaultDB": "mindlinc",
-    "mindlinc": {
-        "connection": "host='mindlinc-prod.cljmfk9dc93i.ap-southeast-1.rds.amazonaws.com' user='normuser' dbname='mindlincnew' password='ylSBQDdA'"
+    "defaultDB": "cdm",
+    "cdm": {
+        "connection": "host='common-data-model.cjelhsohskdk.us-east-1.rds.amazonaws.com' user='normuser' dbname='cdm' password='yYWozmQATe3doa%4nYNB$r9JeEdRN$yi'",
+        "connectionDict": {
+            "user": "normuser",
+            "dbname": "cdm",
+            "host": "common-data-model.cjelhsohskdk.us-east-1.rds.amazonaws.com",
+            "password": "yYWozmQATe3doa%4nYNB$r9JeEdRN$yi"
+        }
+    },
+    "mindlinc_normuser": {
+        "connection": "host='mindlinc-prod.cljmfk9dc93i.ap-southeast-1.rds.amazonaws.com' user='normuser' dbname='mindlincnew' password='ylSBQDdA'",
+        "connectionDict": {
+            "user": "normuser",
+            "dbname": "mindlincnew",
+            "host": "mindlinc-prod.cljmfk9dc93i.ap-southeast-1.rds.amazonaws.com",
+            "password": "ylSBQDdA"
+        }
     }
 }

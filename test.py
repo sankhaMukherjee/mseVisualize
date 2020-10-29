@@ -2,6 +2,12 @@ import pgIO
 import os, pickle
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import font_manager as fm
+from matplotlib.patches import Rectangle
+from matplotlib.collections import PatchCollection
+
+import matplotlib as mpl
+mpl.rcParams['mathtext.fontset'] = 'cm'
 
 
 mseLableHeaders = [
@@ -334,19 +340,74 @@ def getMSElabels(userId):
     return mseLabels
 
 
-def plotData(userData, mseLabels):
+def plot(xData, yData, rawData, yTickPos, yTickLabels, title, start, stop, userId):
+
+    fPath      = '/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf'
+    fPath      = '/usr/local/share/fonts/NeueEinstellung-Regular.otf'
+    prop       = fm.FontProperties(fname=fPath, size='large')
+    propSmall  = fm.FontProperties(fname=fPath, size=8)
+    bgColor    = (224/255, 228/255, 237/255)
+    hmuskBlue  = (25/255, 45/255, 91/255)
+    hmuskGrey  = (151/255, 165/255,194/255)
+
+    n = len(xData)
+    delY = 0.2 #inches
+    yStartPos = 1/( 2 + delY*n )
+    yEndPos   = (delY*n)/( 2 + delY*n )
+    yFrac     = (delY*n)/( 2 + delY*n )
+
+    p = plt.figure(figsize=(11.5, 2+delY*n ), facecolor=bgColor)
+    ax = plt.axes([0.3, yStartPos, 0.69, yEndPos], facecolor='None')
+
+    for x, y, r in zip(xData, yData, rawData):
+        
+        if r: 
+            mec = hmuskGrey
+        else:
+            mec = hmuskBlue
+
+        plt.plot(x, y, '|', mec=mec)
+
+    plt.axhline(y=sum(rawData), color='k', lw=1)
+    plt.ylim([-0.5, n+0.5])
+    plt.yticks( yTickPos, yTickLabels, fontproperties=prop, fontsize=10 )
+
+    titleYPos = (1.5 + delY*n)/( 2 + delY*n )
+    plt.figtext( 0.3 + 0.69/2, titleYPos, title, fontproperties=prop, fontsize=14 )
+
+    plt.axvline(start, ls = '--', color='grey')
+    plt.axvline(stop,  ls = '--', color='grey')
+
+    plt.xlabel('Date', fontproperties=prop, fontsize=10)
+    plt.xticks(fontproperties=prop, fontsize=10)
+
+    title = title.lower()
+    title = title.replace(' ', '-').replace('/', '-')
+    plt.savefig( os.path.join(
+            'results',
+            f'{userId}_{title}.png'), 
+            dpi=300, facecolor=bgColor  )
+
+    return
+
+def plotData(userData, mseLabels, userId):
 
     categories = sorted(list(set([c for c, _, _ in userData['mseData']])))
     print(categories)
 
     mseDates = mseLabels['dates']
 
-    for c in categories:
+    for mmm, c in enumerate(categories):
 
-        plt.figure(figsize=(12, 10))
         m1 = m2 = 0
         yVals = []
         yTicks = []
+
+        xData = []
+        yData = []
+        yTickPos, yTickLabels = [], []
+        rawData = []
+        
 
         print(f'\n----[{c}]-----')
         
@@ -354,9 +415,12 @@ def plotData(userData, mseLabels):
             if c1 != c: continue
             print( f'{s}[{len(dates)}]', end=', ' )
 
-            plt.plot(dates, [m1]*len(dates), '.')
-            yVals.append(m1)
-            yTicks.append( s )
+            xData.append( dates )
+            yData.append( [m1]*len(dates) )
+            yTickPos.append( m1 )
+            yTickLabels.append(s)
+            rawData.append(True)
+
             m1 += 1
 
         print()
@@ -372,13 +436,15 @@ def plotData(userData, mseLabels):
             print( f'{s} -> {count}', end=', ' )
             dates1 = [d for j, d in enumerate(mseDates) if labels[j]==1]
 
-            plt.plot(dates1, [m1+m2+1]*len(dates1), 'o')
-            yVals.append(m1+m2+1)
-            yTicks.append( s )
+            xData.append( dates1 )
+            yData.append( [m1+m2+1]*len(dates1) )
+            yTickPos.append(m1+m2+1)
+            yTickLabels.append( f'{s} [{i:03}]' )
+            rawData.append( False )
+
             m2 += 1
 
-        plt.yticks( yVals, yTicks )
-
+        plot(xData, yData, rawData, yTickPos, yTickLabels, c, userData['rexultiStart'], userData['rexultiStop'], userId)
         print()
     
     plt.show()
@@ -392,7 +458,7 @@ def main():
     userData  = getData(userId)
     mseLabels = getMSElabels(userId)
 
-    plotData(userData, mseLabels)
+    plotData(userData, mseLabels, userId)
 
     if True and mseLabels is not None:
         print(len(mseLabels['dates']))

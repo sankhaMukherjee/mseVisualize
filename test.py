@@ -1,5 +1,6 @@
 import pgIO
 import os, pickle
+import numpy as np
 
 
 
@@ -52,14 +53,54 @@ def getData(userId):
 
     return userData
 
+def getMSElabels(userId):
 
+    try:
+        fileName = f'data/{userId}_labels.pkl'
+
+        if os.path.exists(fileName):
+            mseLabels = pickle.load( open(fileName, 'rb') )
+            return mseLabels
+
+        data = pgIO.getAllData('''
+            select * from r20r1_dcdm.derived_mse
+            where
+                person_id = %s
+        ''', (userId, ))
+
+        data  = list(zip(*data))
+        dates = data[1]
+        labels = []
+        for i in range(241):
+            labels.append( list(data[3+i]) )
+        labels = np.array(labels)
+
+        mseLabels = {
+            'dates'  : dates,
+            'labels' : labels }
+
+        with open(fileName, 'wb') as fOut:
+            pickle.dump( mseLabels, fOut )
+
+        return mseLabels
+
+    except Exception as e:
+        print(f'Unable to get mse data: {e}')
+        return None
+
+    return mseLabels
 
 def main():
 
     userId = 3010019
-    userData = getData(userId)
+    userData  = getData(userId)
+    mseLabels = getMSElabels(userId)
 
-    if userData is not None:
+    if mseLabels is not None:
+        print(len(mseLabels['dates']))
+        print(mseLabels['labels'].shape)
+
+    if False and userData is not None:
         print(userData['rexultiStart'])
         print(userData['rexultiStop'])
         for category, sign, dates in userData['mseData']:

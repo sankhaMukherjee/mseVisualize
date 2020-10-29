@@ -288,10 +288,14 @@ def getData(userId):
             where
                 person_id = %s''', (userId,))
 
-        _, start, stop, _ = data[0]
+        starts, stops = [], []
+        for _, start, stop, _ in data:
+            starts.append( start )
+            stops.append( stop )
 
-        userData['rexultiStart'] = start
-        userData['rexultiStop']  = stop
+
+        userData['rexultiStart'] = starts
+        userData['rexultiStop']  = stops
 
         with open( fileName, 'wb' ) as fOut:
             pickle.dump( userData, fOut )
@@ -339,8 +343,7 @@ def getMSElabels(userId):
 
     return mseLabels
 
-
-def plot(xData, yData, rawData, yTickPos, yTickLabels, title, start, stop, userId):
+def plot(xData, yData, rawData, yTickPos, yTickLabels, title, starts, stops, userId):
 
     fPath      = '/usr/share/fonts/truetype/msttcorefonts/Times_New_Roman.ttf'
     fPath      = '/usr/local/share/fonts/NeueEinstellung-Regular.otf'
@@ -375,8 +378,9 @@ def plot(xData, yData, rawData, yTickPos, yTickLabels, title, start, stop, userI
     titleYPos = (1.5 + delY*n)/( 2 + delY*n )
     plt.figtext( 0.3 + 0.69/2, titleYPos, title, fontproperties=prop, fontsize=14 )
 
-    plt.axvline(start, ls = '--', color='grey')
-    plt.axvline(stop,  ls = '--', color='grey')
+    for start, stop in zip(starts, stops):
+        plt.axvline(start, ls = '--', color='#ba4a00', lw=2)
+        plt.axvline(stop,  ls = '-', color='#d4ac0d', lw=1)
 
     plt.xlabel('Date', fontproperties=prop, fontsize=10)
     plt.xticks(fontproperties=prop, fontsize=10)
@@ -447,7 +451,7 @@ def plotData(userData, mseLabels, userId):
         plot(xData, yData, rawData, yTickPos, yTickLabels, c, userData['rexultiStart'], userData['rexultiStop'], userId)
         print()
     
-    plt.show()
+    plt.close()
             
 
     return 
@@ -460,7 +464,7 @@ def main():
 
     plotData(userData, mseLabels, userId)
 
-    if True and mseLabels is not None:
+    if False and mseLabels is not None:
         print(len(mseLabels['dates']))
         print(mseLabels['labels'].shape)
 

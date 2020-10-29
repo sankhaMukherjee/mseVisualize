@@ -1,0 +1,6 @@
+{
+    "defaultDB": "mindlinc",
+    "mindlinc": {
+        "connection": "host='mindlinc-prod.cljmfk9dc93i.ap-southeast-1.rds.amazonaws.com' user='normuser' dbname='mindlincnew' password='ylSBQDdA'"
+    }
+}
